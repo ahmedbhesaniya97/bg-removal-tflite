@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { buildCanvas2dPipeline } from "../pipelines/canvas2d/canvas2dPipline";
-function useRenderingPipeline(
-  mediastream,
-  backgroundConfig,
-  segmentationConfig,
-  tflite
-) {
+import useTFLite from "./useTFLite";
+
+function useRenderingPipeline(mediastream, backgroundConfig) {
+  const [segmentationConfig] = useState({
+    model: "meet",
+    backend: "wasm",
+    inputResolution: "256x144",
+    pipeline: "canvas2dCpu",
+  });
+
+  const { tflite } = useTFLite(segmentationConfig);
+
   const [pipeline, setPipeline] = useState(null);
   const backgroundImageRef = useRef(null);
   const canvasRef = useRef(null);
@@ -32,8 +38,6 @@ function useRenderingPipeline(
   }, [mediastream]);
 
   useEffect(() => {
-    // The useEffect cleanup function is not enough to stop
-    // the rendering loop when the framerate is low
     let shouldRender = true;
     let previousTime = 0;
     let beginTime = 0;
@@ -41,22 +45,24 @@ function useRenderingPipeline(
     let frameCount = 0;
     const frameDurations = [];
     let renderRequestId;
-    const newPipeline = buildCanvas2dPipeline(
-      sourcePlayback,
-      backgroundConfig,
-      segmentationConfig,
-      tflite,
-      addFrameEvent
-    );
+    const newPipeline =
+      tflite &&
+      buildCanvas2dPipeline(
+        sourcePlayback,
+        backgroundConfig,
+        segmentationConfig,
+        tflite,
+        addFrameEvent
+      );
 
-    canvasRef.current = newPipeline.mainCanvas;
+    canvasRef.current = newPipeline && newPipeline.mainCanvas;
 
     async function render() {
       if (!shouldRender) {
         return;
       }
       beginFrame();
-      await newPipeline.render();
+      (await newPipeline) && newPipeline.render();
       endFrame();
       renderRequestId = requestAnimationFrame(render);
     }
@@ -87,7 +93,7 @@ function useRenderingPipeline(
     return () => {
       shouldRender = false;
       cancelAnimationFrame(renderRequestId);
-      newPipeline.cleanUp();
+      newPipeline && newPipeline.cleanUp();
 
       setPipeline(null);
     };
@@ -95,7 +101,8 @@ function useRenderingPipeline(
   return {
     pipeline,
     backgroundImageRef,
-    canvasRef,
+    outputStream:
+      canvasRef && canvasRef.current && canvasRef.current.captureStream(),
     fps,
     durations,
   };

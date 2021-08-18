@@ -20,8 +20,8 @@ export function buildCanvas2dPipeline(
   const TempCanvasctx = TempCanvas.getContext("2d");
   segmentationMaskCanvas.width = segmentationWidth;
   segmentationMaskCanvas.height = segmentationHeight;
-  TempCanvas.width = 360;
-  TempCanvas.height = 640;
+  TempCanvas.width = sourcePlayback.width;
+  TempCanvas.height = sourcePlayback.height;
   const segmentationMaskCtx = segmentationMaskCanvas.getContext("2d");
   const inputMemoryOffset = tflite._getInputMemoryOffset() / 4;
   const outputMemoryOffset = tflite._getOutputMemoryOffset() / 4;
@@ -62,10 +62,7 @@ export function buildCanvas2dPipeline(
         segmentationWidth,
         segmentationHeight
       );
-      if (
-        segmentationConfig.model === "meet" ||
-        segmentationConfig.model === "mlkit"
-      ) {
+      if (segmentationConfig.model === "meet") {
         const imageData = segmentationMaskCtx.getImageData(
           0,
           0,
@@ -95,9 +92,6 @@ export function buildCanvas2dPipeline(
         // Sets only the alpha component of each pixel
         segmentationMask.data[i * 4 + 3] =
           (255 * personExp) / (backgroundExp + personExp); // softmax
-      } else if (segmentationConfig.model === "mlkit") {
-        const person = tflite.HEAPF32[outputMemoryOffset + i];
-        segmentationMask.data[i * 4 + 3] = 255 * person;
       }
     }
     segmentationMaskCtx.putImageData(segmentationMask, 0, 0);

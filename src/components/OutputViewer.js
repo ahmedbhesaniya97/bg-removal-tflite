@@ -3,22 +3,17 @@ import useRenderingPipeline from "../hooks/useRenderingPipeline";
 
 function OutputViewer(props) {
   const videoRef = useRef(null);
-  console.log("O/P VIEWER ", props.tflite);
-  const { pipeline, canvasRef } = useRenderingPipeline(
+  const { pipeline, outputStream } = useRenderingPipeline(
     props.mediastream,
-    props.backgroundConfig,
-    props.segmentationConfig,
-    props.tflite
+    props.backgroundConfig
   );
 
   useEffect(() => {
-    if (pipeline) {
-      const stream = canvasRef.current.captureStream();
-      console.log("STREAM", stream);
-      videoRef.current.srcObject = stream;
+    if (pipeline && outputStream) {
+      videoRef.current.srcObject = outputStream;
       videoRef.current.play();
     }
-  }, [pipeline, props.postProcessingConfig]);
+  }, [pipeline]);
 
   return (
     <div
