@@ -3,7 +3,6 @@ import { buildCanvas2dPipeline } from "../pipelines/canvas2d/canvas2dPipline";
 import useTFLite from "./useTFLite";
 
 function useRenderingPipeline(mediastream, backgroundConfig) {
-
   const [segmentationConfig] = useState({
     model: "meet",
     backend: "wasm",
