@@ -1,19 +1,19 @@
 import React, { useEffect, useRef } from "react";
-import useRenderingPipeline from "../hooks/useRenderingPipeline";
+// import useRenderingPipeline from "../hooks/useRenderingPipeline";
 
 function OutputViewer(props) {
   const videoRef = useRef(null);
-  const { pipeline, outputStream } = useRenderingPipeline(
-    props.mediastream,
-    props.backgroundConfig
-  );
+  // const { pipeline, outputStream } = useRenderingPipeline(
+  //   props.mediastream,
+  //   props.backgroundConfig
+  // );
 
-  useEffect(() => {
-    if (pipeline && outputStream) {
-      videoRef.current.srcObject = outputStream;
-      videoRef.current.play();
-    }
-  }, [pipeline]);
+  // useEffect(() => {
+  //   if (pipeline && outputStream) {
+  //     videoRef.current.srcObject = outputStream;
+  //     videoRef.current.play();
+  //   }
+  // }, [pipeline]);
 
   return (
     <div
